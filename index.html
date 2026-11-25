@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jacaranda Café | Coffee, breakfast and cake in Parkhurst, Johannesburg</title>
+  <meta name="description" content="Neighbourhood café on 4th Avenue, Parkhurst. Coffee roasted in Joburg, breakfast all day, cakes baked every morning. Book a table or order ahead for pickup.">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>try{var t=localStorage.getItem("jacaranda:theme");document.documentElement.dataset.theme=t?JSON.parse(t):(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}</script>
+  <script src="js/data.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="skip" href="#main">Skip to content</a>
+    <nav class="nav wrap" aria-label="Main">
+      <a class="logo" href="#top"><img src="assets/img/favicon.svg" alt="" width="34" height="34">Jacaranda</a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#visit">Visit</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a class="btn btn-primary btn-small" href="#visit">Book a table</a>
+        <button class="icon-btn" id="theme-btn" type="button" aria-label="Switch to dark mode"></button>
+        <button class="icon-btn" id="cart-btn" type="button" aria-label="Your pickup order" aria-controls="cart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 8h14l-1.2 11.1A2 2 0 0 1 15.8 21H8.2a2 2 0 0 1-2-1.9L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+          <span class="cart-count" id="cart-count" hidden>0</span>
+        </button>
+        <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="petals" aria-hidden="true" id="petals"></div>
+      <div class="wrap hero-grid">
+        <div>
+          <h1 id="hero-title">Coffee under the jacarandas</h1>
+          <p class="lead">A neighbourhood café on 4th Avenue, Parkhurst. Coffee roasted down the road in Maboneng, breakfast until close, and cakes baked here every morning.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href="#visit">Book a table</a>
+            <a class="btn btn-outline" href="#menu">See the menu</a>
+          </div>
+          <p class="open-now" id="open-now"><span class="dot" aria-hidden="true"></span><span></span></p>
+        </div>
+        <div class="arch"><img src="assets/img/hero.svg" alt="Illustration of a jacaranda tree in bloom with a flat white beneath it" width="640" height="640"></div>
+      </div>
+    </section>
+
+    <section class="tinted" id="about" aria-labelledby="about-title">
+      <div class="wrap split">
+        <div>
+          <h2 id="about-title">Our story</h2>
+          <p>Nomsa and David opened Jacaranda in 2019 in what used to be a florist, because two old jacaranda trees shade the pavement out front. Every October the terrace turns purple, and every October we're fully booked.</p>
+          <p>We buy single-origin beans from a small roaster in Maboneng, bake our bread and pastries before sunrise, and cook breakfast with eggs from a farm in Magaliesburg. The menu is short on purpose, so everything on it is made properly.</p>
+          <ul class="quality" aria-label="What we care about">
+            <li>Locally roasted coffee</li>
+            <li>Free-range eggs</li>
+            <li>Baked on site daily</li>
+            <li>Oat, almond and soy milk at no extra cost</li>
+          </ul>
+        </div>
+        <ul class="services">
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 10h16v3a8 8 0 0 1-16 0z"/><path d="M8 3v3M12 3v3M16 3v3"/></svg></span><div><h3>Sit in or on the terrace</h3><p>Forty seats inside and twenty-four outside under the trees. Dogs are welcome on the terrace.</p></div></li>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 8h14l-1.2 11.1A2 2 0 0 1 15.8 21H8.2a2 2 0 0 1-2-1.9L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span><div><h3>Order ahead for pickup</h3><p>Add items from the menu, choose a time, and skip the queue at the counter.</p></div></li>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span><div><h3>Private bookings</h3><p>Hire the terrace for birthdays, baby showers or team breakfasts of up to 24 people.</p></div></li>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg></span><div><h3>Work from here</h3><p>Fast fibre Wi-Fi and plug points at every bench, all day.</p></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="menu" aria-labelledby="menu-title">
+      <div class="wrap">
+        <div class="menu-head">
+          <div>
+            <h2 id="menu-title">Menu</h2>
+            <p>Prices in rand, VAT included. Tap Add to build a pickup order.</p>
+          </div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Menu categories" id="tabs"></div>
+        <div class="menu-list" id="menu-list" role="tabpanel" aria-labelledby="tabs"></div>
+      </div>
+    </section>
+
+    <section class="tinted" id="gallery" aria-labelledby="gallery-title">
+      <div class="wrap">
+        <h2 id="gallery-title">Inside the café</h2>
+        <div class="gallery" id="gallery-grid"></div>
+      </div>
+    </section>
+
+    <section id="reviews" aria-labelledby="reviews-title">
+      <div class="wrap reviews">
+        <div>
+          <h2 id="reviews-title">What regulars say</h2>
+          <div class="score" id="score"></div>
+          <p class="muted" id="score-note"></p>
+        </div>
+        <div class="carousel" aria-roledescription="carousel" aria-label="Customer reviews">
+          <div class="slides"><div class="track" id="track"></div></div>
+          <div class="car-controls">
+            <div class="dots" id="dots"></div>
+            <button class="icon-btn" id="prev" type="button" aria-label="Previous review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+            <button class="icon-btn" id="next" type="button" aria-label="Next review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tinted" id="visit" aria-labelledby="visit-title">
+      <div class="wrap">
+        <h2 id="visit-title">Book a table</h2>
+        <div class="reserve">
+          <div class="card" id="reserve-card">
+            <form id="reserve-form" novalidate>
+              <div class="row-2">
+                <div class="field"><label for="r-name">Name</label><input id="r-name" autocomplete="name"><span class="error"></span></div>
+                <div class="field"><label for="r-phone">Mobile number</label><input id="r-phone" type="tel" autocomplete="tel" placeholder="082 123 4567"><span class="error"></span></div>
+              </div>
+              <div class="field"><label for="r-email">Email</label><input id="r-email" type="email" autocomplete="email"><span class="hint">We'll send your confirmation here.</span><span class="error"></span></div>
+              <div class="row-3">
+                <div class="field"><label for="r-date">Date</label><input id="r-date" type="date"><span class="error"></span></div>
+                <div class="field"><label for="r-time">Time</label><select id="r-time"></select><span class="error"></span></div>
+                <div class="field"><label for="r-guests">Guests</label><select id="r-guests"></select><span class="error"></span></div>
+              </div>
+              <fieldset class="seating">
+                <legend>Where would you like to sit?</legend>
+                <label><input type="radio" name="seat" value="Terrace" checked><span>Terrace</span></label>
+                <label><input type="radio" name="seat" value="Inside"><span>Inside</span></label>
+                <label><input type="radio" name="seat" value="Either"><span>No preference</span></label>
+              </fieldset>
+              <div class="field"><label for="r-msg">Special requests <span class="muted">(optional)</span></label><textarea id="r-msg" rows="3" maxlength="300" placeholder="Birthday, high chair, dietary needs…"></textarea><span class="hint" id="msg-count">0 / 300</span></div>
+              <button class="btn btn-primary btn-block" type="submit">Request booking</button>
+            </form>
+          </div>
+          <div class="info">
+            <h3>Address</h3>
+            <p>Corner of 4th Avenue and 11th Street<br>Parkhurst, Johannesburg, 2193<br><a href="https://maps.google.com/?q=4th+Avenue+Parkhurst+Johannesburg" target="_blank" rel="noopener">Open in Google Maps</a></p>
+            <h3>Opening hours</h3>
+            <table class="hours" id="hours"></table>
+            <h3>Contact</h3>
+            <p><a href="tel:+27110000001">011 000 0001</a><br><a href="mailto:hello@jacarandacafe.co.za">hello@jacarandacafe.co.za</a></p>
+            <p class="muted" style="font-size:.92rem">Tables for groups of 9 or more: please call us.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div>
+        <a class="logo" href="#top"><img src="assets/img/favicon.svg" alt="" width="34" height="34">Jacaranda</a>
+        <p style="margin-top:1rem">Neighbourhood café on 4th Avenue, Parkhurst. Coffee, breakfast and cake since 2019.</p>
+        <div class="socials">
+          <a href="https://instagram.com" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a href="https://facebook.com" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H8v4h2v8h4v-8h3l1-4h-4V8z"/></svg></a>
+          <a href="https://tiktok.com" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 3c.3 2.4 1.8 4 4 4.2v3.2a7.4 7.4 0 0 1-4-1.3V15a6 6 0 1 1-6-6h.5v3.3A2.8 2.8 0 1 0 12.8 15V3z"/></svg></a>
+          <a href="https://wa.me/27820000000" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.9-2.7-1.2-4.4-4-4.6-4.2-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.6-.1 1.2z"/></svg></a>
+        </div>
+      </div>
+      <div><h3>Visit</h3><ul><li><a href="#visit">Book a table</a></li><li><a href="#menu">Menu</a></li><li><a href="#gallery">Gallery</a></li></ul></div>
+      <div><h3>Order</h3><ul><li><button class="linklike" id="footer-cart" type="button" style="background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer">Your pickup order</button></li><li><a href="#about">Private bookings</a></li></ul></div>
+      <div><h3>Contact</h3><ul><li><a href="tel:+27110000001">011 000 0001</a></li><li><a href="mailto:hello@jacarandacafe.co.za">hello@jacarandacafe.co.za</a></li><li>4th Avenue, Parkhurst</li></ul></div>
+    </div>
+    <div class="wrap footer-bottom"><span>© <span id="year"></span> Jacaranda Café. A demo project.</span><span>Card, SnapScan and cash accepted.</span></div>
+  </footer>
+
+  <aside class="drawer" id="cart" aria-label="Your pickup order" aria-hidden="true">
+    <div class="drawer-head"><h2>Your order</h2><button class="icon-btn" id="cart-close" type="button" aria-label="Close order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="drawer-body" id="cart-body"></div>
+    <div class="drawer-foot" id="cart-foot"></div>
+  </aside>
+  <div class="drawer-bg" id="drawer-bg"></div>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button class="lb-btn lb-close" id="lb-close" type="button" aria-label="Close">×</button>
+    <button class="lb-btn lb-prev" id="lb-prev" type="button" aria-label="Previous photo">‹</button>
+    <figure><img id="lb-img" src="" alt=""><figcaption id="lb-cap"></figcaption></figure>
+    <button class="lb-btn lb-next" id="lb-next" type="button" aria-label="Next photo">›</button>
+  </div>
+</body>
+</html>
