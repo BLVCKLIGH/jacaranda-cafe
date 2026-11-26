@@ -95,3 +95,36 @@ To update the site later, zip the files again and drag the zip onto the app's de
 - **No backend:** bookings, orders and results are saved in the visitor's browser with `localStorage`, so they stay on that device only. Sign-in and payment screens are UI only, with no real passwords stored and no payment taken.
 - **Images** are original SVG illustrations made for this project. To use real photos, replace the files in `assets/` or change the image paths in `js/data.js`.
 - **Screenshots** in `screenshots/` were taken without the Google Fonts loaded, so the lettering on the live site looks a little different.
+
+## Photos
+
+Menu, hero and gallery photos load from Unsplash (see the `PHOTO` list at the top of `js/data.js`).
+To use your own photos, put them in `assets/photos/` and change that item's value, e.g.
+`"flat-white": "assets/photos/flat-white.jpg"`. If any photo fails to load, the original illustration
+from `assets/img/` is shown instead.
+
+## Sign in / create account (Azure database)
+
+`login.html` + `js/login.js` call a small Azure Functions API in the `api/` folder.
+Accounts and table bookings are stored in **Azure Table Storage**.
+
+- `POST /api/register`: create an account (password hashed with scrypt, never stored in plain text)
+- `POST /api/login`: sign in (locks for 15 minutes after 5 wrong passwords)
+- `GET  /api/me`: check the session
+- `POST /api/reservation`: save a table booking (linked to the account if signed in)
+
+### Connect it to your Azure database
+1. Create a **Storage account** in `websites-rg` (LRS). Copy its connection string from
+   *Security + networking > Access keys*.
+2. Open the `jacaranda-cafe` Static Web App > *Settings > Environment variables* and add:
+   - `STORAGE_CONNECTION` = the connection string
+   - `AUTH_SECRET` = any long random string (32+ characters)
+3. In `.github/workflows/azure-static-web-apps-*.yml`, set `api_location: "api"`.
+4. Push to GitHub. The `users` and `reservations` tables are created automatically on first use.
+5. View the data in the storage account > *Storage browser > Tables*.
+
+### Run the API tests
+```
+cd api
+npm test
+```

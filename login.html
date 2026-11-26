@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in | Jacaranda Café</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>try{var t=localStorage.getItem("jacaranda:theme");document.documentElement.dataset.theme=t?JSON.parse(t):(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}</script>
+  <script src="js/data.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/login.js" defer></script>
+</head>
+<body class="auth-page">
+  <header class="site-header">
+    <nav class="nav wrap" aria-label="Main">
+      <a class="logo" href="index.html"><img src="assets/img/favicon.svg" alt="" width="34" height="34">Jacaranda</a>
+      <div class="nav-actions" style="margin-left:auto">
+        <a class="btn btn-outline btn-small" href="index.html">Back to the café</a>
+        <button class="icon-btn" id="theme-btn" type="button" aria-label="Switch to dark mode"></button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="auth">
+    <div class="auth-photo" aria-hidden="true">
+      <img id="auth-img" src="assets/img/hero.svg" data-fallback="assets/img/hero.svg" alt="">
+      <p class="auth-quote">Your usual table is under the trees.</p>
+    </div>
+
+    <div class="auth-panel">
+      <div class="card auth-card">
+        <div id="signed-in" hidden>
+          <h1>You're signed in</h1>
+          <p>Signed in as <strong id="who"></strong>.</p>
+          <div class="auth-actions">
+            <a class="btn btn-primary" href="index.html">Continue to the café</a>
+            <button class="btn btn-outline" id="signout" type="button">Sign out</button>
+          </div>
+        </div>
+
+        <div id="forms">
+          <h1 id="auth-title">Welcome back</h1>
+          <p class="muted" id="auth-sub">Sign in to book tables faster and keep your details on file.</p>
+
+          <div class="auth-tabs" role="tablist" aria-label="Account">
+            <button type="button" role="tab" id="tab-in" aria-selected="true" aria-controls="form-in">Sign in</button>
+            <button type="button" role="tab" id="tab-up" aria-selected="false" aria-controls="form-up">Create account</button>
+          </div>
+
+          <div class="auth-alert" id="alert" role="alert" hidden></div>
+
+          <form id="form-in" role="tabpanel" aria-labelledby="tab-in" novalidate>
+            <div class="field"><label for="in-email">Email</label><input id="in-email" type="email" autocomplete="email" inputmode="email"><span class="error"></span></div>
+            <div class="field">
+              <label for="in-pass">Password</label>
+              <div class="pass"><input id="in-pass" type="password" autocomplete="current-password"><button type="button" class="pass-toggle" data-for="in-pass" aria-label="Show password" aria-pressed="false">Show</button></div>
+              <span class="error"></span>
+            </div>
+            <label class="check"><input type="checkbox" id="in-remember" checked> Keep me signed in on this device</label>
+            <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+          </form>
+
+          <form id="form-up" role="tabpanel" aria-labelledby="tab-up" novalidate hidden>
+            <div class="field"><label for="up-name">Full name</label><input id="up-name" autocomplete="name"><span class="error"></span></div>
+            <div class="field"><label for="up-email">Email</label><input id="up-email" type="email" autocomplete="email" inputmode="email"><span class="error"></span></div>
+            <div class="field">
+              <label for="up-pass">Password</label>
+              <div class="pass"><input id="up-pass" type="password" autocomplete="new-password" aria-describedby="up-hint"><button type="button" class="pass-toggle" data-for="up-pass" aria-label="Show password" aria-pressed="false">Show</button></div>
+              <span class="hint" id="up-hint">At least 8 characters.</span>
+              <span class="error"></span>
+            </div>
+            <div class="field"><label for="up-pass2">Confirm password</label><input id="up-pass2" type="password" autocomplete="new-password"><span class="error"></span></div>
+            <button class="btn btn-primary btn-block" type="submit">Create account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

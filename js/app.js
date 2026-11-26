@@ -27,8 +27,34 @@ function joburgNow() {
 const OPEN = { 0: [480, 840], 1: [390, 960], 2: [390, 960], 3: [390, 960], 4: [390, 960], 5: [390, 960], 6: [420, 960] };
 const hhmm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
 
+/* If a photo fails to load, swap in the illustration named in data-fallback */
+document.addEventListener("error", e => {
+  const i = e.target;
+  if (i.tagName === "IMG" && i.dataset.fallback && !i.src.endsWith(i.dataset.fallback)) i.src = i.dataset.fallback;
+}, true);
+
 document.addEventListener("DOMContentLoaded", () => {
   $("#year").textContent = new Date().getFullYear();
+  if (typeof photo === "function") $("#hero-img").src = photo("hero", 900);
+
+  /* Account button: sign in link, or initial + menu when signed in */
+  const session = Auth.get(), acctBtn = $("#account-btn"), acctMenu = $("#account-menu");
+  if (session) {
+    acctBtn.textContent = session.user.name.trim()[0].toUpperCase();
+    acctBtn.classList.add("on");
+    acctBtn.setAttribute("aria-label", "Account: " + session.user.name);
+    acctBtn.setAttribute("aria-expanded", "false");
+    acctBtn.removeAttribute("href"); acctBtn.setAttribute("role", "button"); acctBtn.tabIndex = 0;
+    $("#account-name").textContent = session.user.name;
+    const toggle = () => { acctMenu.hidden = !acctMenu.hidden; acctBtn.setAttribute("aria-expanded", String(!acctMenu.hidden)); };
+    acctBtn.addEventListener("click", toggle);
+    acctBtn.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    document.addEventListener("click", e => { if (!e.target.closest("#account")) { acctMenu.hidden = true; acctBtn.setAttribute("aria-expanded", "false"); } });
+    $("#signout-btn").addEventListener("click", () => { Auth.clear(); location.reload(); });
+    Auth.call("me").then(r => { if (r.status === 401) { Auth.clear(); location.reload(); } });   // token expired or account removed
+  } else {
+    acctBtn.href = "login.html";
+  }
 
   /* Theme */
   const themeBtn = $("#theme-btn");
@@ -87,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const items = activeCat === "All" ? MENU : MENU.filter(m => m.cat === activeCat);
     $("#menu-list").innerHTML = items.map(m => `
       <article class="dish">
-        <img src="${m.img}" alt="${esc(m.name)}" loading="lazy" width="112" height="112">
+        <img src="${m.img}" data-fallback="${m.fallback}" alt="${esc(m.name)}" loading="lazy" width="112" height="112">
         <div>
           <div class="dish-top"><h3>${esc(m.name)}</h3><span class="leader" aria-hidden="true"></span><span class="cost">${R(m.price)}</span></div>
           <p>${esc(m.desc)}</p>
@@ -144,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     $("#cart-body").innerHTML = ids.map(id => {
       const m = MENU.find(x => x.id === id);
-      return `<div class="line-item"><img src="${m.img}" alt=""><div><strong>${esc(m.name)}</strong>
+      return `<div class="line-item"><img src="${m.img}" data-fallback="${m.fallback}" alt=""><div><strong>${esc(m.name)}</strong>
         <div class="qty"><button type="button" data-dec="${id}" aria-label="Remove one ${esc(m.name)}">−</button><span>${cart[id]}</span><button type="button" data-inc="${id}" aria-label="Add one ${esc(m.name)}">+</button></div></div>
         <span>${R(m.price * cart[id])}</span></div>`;
     }).join("");
@@ -183,10 +209,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCart();
 
   /* Gallery + lightbox */
-  $("#gallery-grid").innerHTML = GALLERY.map((g, i) => `<button type="button" data-i="${i}" aria-label="Open photo: ${esc(g.caption)}"><img src="${g.src}" alt="${esc(g.alt)}" loading="lazy"><figcaption>${esc(g.caption)}</figcaption></button>`).join("");
+  $("#gallery-grid").innerHTML = GALLERY.map((g, i) => `<button type="button" data-i="${i}" aria-label="Open photo: ${esc(g.caption)}"><img src="${g.src}" data-fallback="${g.fallback}" alt="${esc(g.alt)}" loading="lazy"><figcaption>${esc(g.caption)}</figcaption></button>`).join("");
   let lbIndex = 0, lastFocus = null;
   const lb = $("#lightbox");
-  const showLb = i => { lbIndex = (i + GALLERY.length) % GALLERY.length; const g = GALLERY[lbIndex]; $("#lb-img").src = g.src; $("#lb-img").alt = g.alt; $("#lb-cap").textContent = g.caption; };
+  const showLb = i => { lbIndex = (i + GALLERY.length) % GALLERY.length; const g = GALLERY[lbIndex]; $("#lb-img").dataset.fallback = g.fallback; $("#lb-img").src = g.full || g.src; $("#lb-img").alt = g.alt; $("#lb-cap").textContent = g.caption; };
   $("#gallery-grid").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; lastFocus = b; showLb(Number(b.dataset.i)); lb.classList.add("open"); $("#lb-close").focus(); });
   const closeLb = () => { lb.classList.remove("open"); if (lastFocus) lastFocus.focus(); };
   $("#lb-close").addEventListener("click", closeLb);
@@ -244,6 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
     date.value = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
     fillTimes();
   }
+  if (session) { $("#r-name").value = session.user.name; $("#r-email").value = session.user.email; }
   $("#r-msg").addEventListener("input", e => { $("#msg-count").textContent = `${e.target.value.length} / 300`; });
 
   function setError(input, msg) {
@@ -267,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("input", () => { if (el.getAttribute("aria-invalid") === "true") setError(el, checks[id](el.value)); });
   });
 
-  $("#reserve-form").addEventListener("submit", e => {
+  $("#reserve-form").addEventListener("submit", async e => {
     e.preventDefault();
     fillTimes();
     const ok = Object.keys(checks).map(id => setError(document.getElementById(id), checks[id](document.getElementById(id).value)));
@@ -277,12 +304,18 @@ document.addEventListener("DOMContentLoaded", () => {
       name: $("#r-name").value.trim(), phone: $("#r-phone").value.trim(), email: $("#r-email").value.trim(),
       date: date.value, time: time.value, guests: Number($("#r-guests").value), seat: $('input[name="seat"]:checked').value, note: $("#r-msg").value.trim(),
     };
+    const submitBtn = $('#reserve-form button[type="submit"]');
+    submitBtn.disabled = true; submitBtn.textContent = "Sending…";
+    const saved = await Auth.call("reservation", { ...b, guests: b.guests });   // saved in Azure Table Storage
+    if (saved.ok) b.ref = saved.data.ref;
     store.set("reservations", [b, ...store.get("reservations", [])]);
     const nice = new Date(b.date + "T00:00:00").toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long" });
     $("#reserve-card").innerHTML = `<div class="confirm" tabindex="-1" id="confirm-box">
       <p class="big">Table requested</p>
       <p style="margin-inline:auto">${esc(b.name.split(" ")[0])}, we've received your booking for <strong>${b.guests} ${b.guests === 1 ? "person" : "people"}</strong> on <strong>${nice} at ${b.time}</strong> (${b.seat === "Either" ? "any table" : b.seat.toLowerCase()}).</p>
-      <p style="margin-inline:auto">Your reference is <strong>${b.ref}</strong>. We'll confirm by SMS to ${esc(b.phone)} within two hours.</p>
+      ${saved.ok
+        ? `<p style="margin-inline:auto">Your reference is <strong>${b.ref}</strong>. We'll confirm by SMS to ${esc(b.phone)} within two hours.</p>`
+        : `<p style="margin-inline:auto"><strong>We couldn't send this to our booking system</strong>, so please call us on <a href="tel:+27110000001">011 000 0001</a> to confirm. Your reference is ${b.ref}.</p>`}
       <button class="btn btn-outline" type="button" id="another">Make another booking</button></div>`;
     $("#confirm-box").focus();
     $("#another").addEventListener("click", () => location.reload());

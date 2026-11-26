@@ -1,4 +1,29 @@
-/* Menu data. Swap `img` for a photo path (e.g. assets/img/flat-white.jpg) whenever you have real photos. */
+/* Photos are loaded from Unsplash (free to use). To use your own photos instead, put them in assets/photos/
+   and replace the PHOTO value for that item with the path, e.g.  "flat-white": "assets/photos/flat-white.jpg"
+   If a photo ever fails to load, the original illustration in assets/img/ is shown instead. */
+const U = (id, w = 600) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=75`;
+const PHOTO = {
+  // Coffee
+  "flat-white": "1534778101976-62847782c213", "cappuccino": "1572442388796-11668a67e53d", "americano": "1495474472287-4d71bcdd2085",
+  "red-cappuccino": "1509042239860-f550ce710b93", "mocha": "1514432324607-a09d9b4aefdd", "iced-latte": "1461023058943-07fcbe16d735",
+  // Fast food
+  "burger": "1568901346375-23c9450c58cd", "toastie": "1528735602780-2552fd46c7af", "wrap": "1626700051175-6818013e1d4f",
+  "chips": "1573080496219-bb080dd4f877", "bowl": "1512621776951-a57141f2eefd",
+  // Desserts
+  "croissant": "1555507036-ab1f4038808a", "cake": "1565958011703-44f9829ba187", "carrot-cake": "1621303837174-89787a7d4729",
+  "brownie": "1606313564200-e75d5e30476c", "malva": "1488477181946-6428a0291777",
+  // Beverages
+  "smoothie": "1553530666-ba11a7da3888", "lemonade": "1621263764928-df1444c5e859", "rooibos": "1544787219-7f47ccb76574",
+  "milkshake": "1572490122747-3968b75cc699", "juice": "1600271886742-f049cd451bba",
+  // Specials
+  "jacaranda-latte": "1541167760496-1628856ab772", "pancakes": "1567620905732-2d1ec7ab7445", "shakshuka": "1590412200988-a436970781fa",
+  "breakfast": "1525351484163-7529414344d8",
+  // Gallery + hero
+  "hero": "1554118811-1e0d58224f24", "g-terrace": "1559329007-40df8a9345d8", "g-counter": "1442512595331-e89e73853f31",
+  "g-flatwhite": "1495474472287-4d71bcdd2085", "g-storefront": "1521017432531-fbd92d768814", "g-bakes": "1509440159596-0249088772ff",
+  "g-brunch": "1504754524776-8f4f37790ca0",
+};
+const photo = (key, w) => { const p = PHOTO[key]; return /^(assets|https?:)/.test(p) ? p : U(p, w); };
 const MENU = [
   // Coffee
   { id: "c1", cat: "Coffee", name: "Flat white", desc: "Double ristretto with silky steamed milk. Our house blend is roasted in Maboneng.", price: 38, img: "flat-white", tags: ["Bestseller"] },
@@ -30,17 +55,17 @@ const MENU = [
   { id: "s2", cat: "Specials", name: "Buttermilk pancakes", desc: "A stack of three with berries, crème fraîche and maple syrup.", price: 95, img: "pancakes" },
   { id: "s3", cat: "Specials", name: "Shakshuka", desc: "Eggs baked in spiced tomato and peppers, with toasted ciabatta.", price: 105, img: "shakshuka", tags: ["Vegetarian"] },
   { id: "s4", cat: "Specials", name: "Big Parkhurst breakfast", desc: "Two eggs, bacon, boerewors, mushrooms, tomato and toast.", price: 135, img: "breakfast" },
-].map(m => ({ ...m, img: `assets/img/${m.img}.svg` }));
+].map(m => ({ ...m, fallback: `assets/img/${m.img}.svg`, img: photo(m.img, 400) }));
 
 const MENU_CATS = ["Coffee", "Fast food", "Desserts", "Beverages", "Specials"];
 
 const GALLERY = [
-  { src: "assets/img/gallery-terrace.svg", alt: "Outdoor tables under two jacaranda trees", caption: "The terrace in November" },
-  { src: "assets/img/gallery-counter.svg", alt: "Espresso machine on the green-tiled coffee bar", caption: "Our coffee bar" },
-  { src: "assets/img/gallery-flatwhite.svg", alt: "Flat white with latte art", caption: "Flat white, the most-ordered drink" },
-  { src: "assets/img/gallery-storefront.svg", alt: "The café shopfront with a striped purple awning", caption: "Find us on 4th Avenue" },
-  { src: "assets/img/gallery-bakes.svg", alt: "Croissants and brownies on plates", caption: "Baked here every morning" },
-  { src: "assets/img/gallery-brunch.svg", alt: "Pancakes with berries and a pot of rooibos", caption: "Saturday brunch" },
+  { src: photo("g-terrace", 800), full: photo("g-terrace", 1400), fallback: "assets/img/gallery-terrace.svg", alt: "Outdoor tables under two jacaranda trees", caption: "The terrace in November" },
+  { src: photo("g-counter", 800), full: photo("g-counter", 1400), fallback: "assets/img/gallery-counter.svg", alt: "Espresso machine on the green-tiled coffee bar", caption: "Our coffee bar" },
+  { src: photo("g-flatwhite", 800), full: photo("g-flatwhite", 1400), fallback: "assets/img/gallery-flatwhite.svg", alt: "Flat white with latte art", caption: "Flat white, the most-ordered drink" },
+  { src: photo("g-storefront", 800), full: photo("g-storefront", 1400), fallback: "assets/img/gallery-storefront.svg", alt: "The café shopfront with a striped purple awning", caption: "Find us on 4th Avenue" },
+  { src: photo("g-bakes", 800), full: photo("g-bakes", 1400), fallback: "assets/img/gallery-bakes.svg", alt: "Croissants and brownies on plates", caption: "Baked here every morning" },
+  { src: photo("g-brunch", 800), full: photo("g-brunch", 1400), fallback: "assets/img/gallery-brunch.svg", alt: "Pancakes with berries and a pot of rooibos", caption: "Saturday brunch" },
 ];
 
 const REVIEWS = [
