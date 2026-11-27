@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!r.ok) {
       const msg = r.status === 404
         ? "The sign-in service isn't set up on this site yet. Deploy the /api folder and connect the database (see README)."
-        : r.data.error || "Something went wrong. Please try again.";
+        : (r.data.error || "Something went wrong. Please try again.") + (r.data.code ? ` (error: ${r.data.code})` : "");
       if (r.data.field) { const el = form.querySelector(`[id$="-${r.data.field === "password" ? "pass" : r.data.field}"]`); if (el) { setError(el, r.data.error); el.focus(); return; } }
       showAlert(msg); return;
     }

@@ -22,10 +22,10 @@ const handlers = {
     try {
       await store.createEntity("users", {
         partitionKey: "user", rowKey: rowKey(email), email, name,
-        passwordHash: await sec.hashPassword(password), createdAt: new Date().toISOString(), failCount: 0, lockUntil: 0,
+        passwordHash: await sec.hashPassword(password), createdAt: new Date().toISOString(), failCount: 0, lockUntil: "",
       });
     } catch (e) {
-      if (e.statusCode === 409) return fail(409, "An account with that email already exists. Try signing in.", { field: "email" });
+      if (e.statusCode === 409 || e.code === "EntityAlreadyExists" || /already exists/i.test(e.message || "")) return fail(409, "An account with that email already exists. Try signing in.", { field: "email" });
       throw e;
     }
     return { status: 201, body: { token: sec.signToken({ sub: email, name }), user: { name, email } } };
@@ -35,8 +35,9 @@ const handlers = {
     const email = clean(body.email, 120).toLowerCase(), password = String(body.password ?? "");
     if (!EMAIL.test(email) || !password) return fail(400, "Enter your email and password.");
     const user = await store.getEntity("users", "user", rowKey(email));
-    if (user && Number(user.lockUntil) > Date.now()) {
-      const mins = Math.ceil((Number(user.lockUntil) - Date.now()) / 60000);
+    const lockedUntil = user && user.lockUntil ? Date.parse(user.lockUntil) : 0;
+    if (user && lockedUntil > Date.now()) {
+      const mins = Math.ceil((lockedUntil - Date.now()) / 60000);
       return fail(429, `Too many wrong passwords. Try again in ${mins} minute${mins === 1 ? "" : "s"}.`);
     }
     dummyHash ||= await sec.hashPassword("dummy-password");
@@ -44,11 +45,11 @@ const handlers = {
     if (!user || !ok) {
       if (user) {
         const fails = Number(user.failCount || 0) + 1;
-        await store.mergeEntity("users", { partitionKey: "user", rowKey: user.rowKey, failCount: fails >= MAX_FAILS ? 0 : fails, lockUntil: fails >= MAX_FAILS ? Date.now() + LOCK_MS : 0 });
+        await store.mergeEntity("users", { partitionKey: "user", rowKey: user.rowKey, failCount: fails >= MAX_FAILS ? 0 : fails, lockUntil: fails >= MAX_FAILS ? new Date(Date.now() + LOCK_MS).toISOString() : "" });
       }
       return fail(401, "Incorrect email or password.");
     }
-    if (Number(user.failCount) > 0) await store.mergeEntity("users", { partitionKey: "user", rowKey: user.rowKey, failCount: 0, lockUntil: 0 });
+    if (Number(user.failCount) > 0) await store.mergeEntity("users", { partitionKey: "user", rowKey: user.rowKey, failCount: 0, lockUntil: "" });
     return { status: 200, body: { token: sec.signToken({ sub: user.email, name: user.name }), user: publicUser(user) } };
   },
 
@@ -107,7 +108,7 @@ async function run(name, input) {
   catch (e) {
     if (e.code === "NOT_CONFIGURED") return fail(503, "The database isn't connected yet. Add STORAGE_CONNECTION and AUTH_SECRET in the Static Web App's environment variables.", { setup: true });
     console.error(name, e);
-    return fail(500, "Something went wrong on our side. Please try again.");
+    return fail(500, "Something went wrong on our side. Please try again.", { code: String(e.code || e.statusCode || e.name || "unknown").slice(0, 40) });
   }
 }
 module.exports = { run };
