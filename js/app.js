@@ -30,12 +30,14 @@ const hhmm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m %
 /* If a photo fails to load, swap in the illustration named in data-fallback */
 document.addEventListener("error", e => {
   const i = e.target;
-  if (i.tagName === "IMG" && i.dataset.fallback && !i.src.endsWith(i.dataset.fallback)) i.src = i.dataset.fallback;
+  if (i.tagName !== "IMG" || !i.dataset.fallback) return;
+  const list = i.dataset.fallback.split("|"), n = Number(i.dataset.n || 0);
+  if (n < list.length) { i.dataset.n = n + 1; i.src = list[n]; }   // try the next source
 }, true);
 
 document.addEventListener("DOMContentLoaded", () => {
   $("#year").textContent = new Date().getFullYear();
-  if (typeof photo === "function") $("#hero-img").src = photo("hero", 900);
+  { const h = $("#hero-img"); h.dataset.fallback = photoFallbacks("hero", 900, 1100); if (h.complete && !h.naturalWidth) h.dispatchEvent(new Event("error")); }   // local file missing: use the internet photo
 
   /* Account button: sign in link, or initial + menu when signed in */
   const session = Auth.get(), acctBtn = $("#account-btn"), acctMenu = $("#account-menu");
@@ -174,28 +176,52 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="qty"><button type="button" data-dec="${id}" aria-label="Remove one ${esc(m.name)}">−</button><span>${cart[id]}</span><button type="button" data-inc="${id}" aria-label="Add one ${esc(m.name)}">+</button></div></div>
         <span>${R(m.price * cart[id])}</span></div>`;
     }).join("");
-    const slots = pickupSlots();
-    $("#cart-foot").innerHTML = `
-      <div class="subtotal"><span>Total</span><span>${R(total)}</span></div>
-      ${slots.length ? `<form id="order-form" novalidate>
+    const slots = pickupSlots(), me = Auth.get();
+    const totalRow = `<div class="subtotal"><span>Total</span><span>${R(total)}</span></div>`;
+    if (!slots.length) {
+      $("#cart-foot").innerHTML = totalRow + `<p class="muted">We're closed for pickup orders now. Ordering opens again at ${hhmm(OPEN[(joburgNow().day + 1) % 7][0])}.</p>`;
+      return;
+    }
+    if (!me) {   // must be signed in to place an order; the cart is kept while they sign in
+      $("#cart-foot").innerHTML = totalRow + `
+        <div class="signin-gate">
+          <p><strong>Sign in to place your order.</strong> Your items stay in the basket while you do.</p>
+          <div class="auth-actions" style="margin-top:.75rem">
+            <a class="btn btn-primary" href="login.html?next=index.html">Sign in</a>
+            <a class="btn btn-outline" href="login.html?next=index.html#signup">Create account</a>
+          </div>
+        </div>`;
+      return;
+    }
+    $("#cart-foot").innerHTML = totalRow + `<form id="order-form" novalidate>
+        <div class="auth-alert" id="o-alert" role="alert" hidden></div>
         <div class="field"><label for="o-time">Pickup time today</label><select id="o-time">${slots.map(s => `<option>${hhmm(s)}</option>`).join("")}</select></div>
         <div class="row-2">
-          <div class="field"><label for="o-name">Name</label><input id="o-name" autocomplete="name"><span class="error"></span></div>
+          <div class="field"><label for="o-name">Name</label><input id="o-name" autocomplete="name" value="${esc(me.user.name)}"><span class="error"></span></div>
           <div class="field"><label for="o-phone">Mobile</label><input id="o-phone" type="tel" autocomplete="tel"><span class="error"></span></div>
         </div>
         <button class="btn btn-primary btn-block" type="submit">Place order, pay at pickup</button>
-      </form>` : `<p class="muted">We're closed for pickup orders now. Ordering opens again at ${hhmm(OPEN[(joburgNow().day + 1) % 7][0])}.</p>`}`;
+      </form>`;
     const f = $("#order-form");
-    if (f) f.addEventListener("submit", e => {
+    f.addEventListener("submit", async e => {
       e.preventDefault();
-      const nm = $("#o-name"), ph = $("#o-phone");
+      const nm = $("#o-name"), ph = $("#o-phone"), alertBox = $("#o-alert"), btn = f.querySelector('button[type="submit"]');
+      alertBox.hidden = true;
       const ok = [setError(nm, nm.value.trim().length >= 2 ? "" : "Enter your name."), setError(ph, saPhone(ph.value) ? "" : "Enter a valid mobile number.")];
       if (ok.includes(false)) return;
-      const ref = "J" + Math.floor(100 + Math.random() * 900);
-      const orders = store.get("orders", []);
-      orders.unshift({ ref, items: { ...cart }, total, time: $("#o-time").value, name: nm.value.trim(), placed: new Date().toISOString() });
-      store.set("orders", orders);
+      btn.disabled = true; btn.textContent = "Placing order…";
       const time = $("#o-time").value;
+      const r = await Auth.call("order", { items: { ...cart }, total, time, name: nm.value.trim(), phone: ph.value.trim() });
+      if (!r.ok) {
+        if (r.status === 401) { Auth.clear(); renderCart(); return; }   // session expired: back to the sign-in prompt
+        btn.disabled = false; btn.textContent = "Place order, pay at pickup";
+        alertBox.textContent = r.data.error || "We couldn't place your order. Please try again.";
+        alertBox.hidden = false; return;
+      }
+      const ref = r.data.ref;
+      const orders = store.get("orders", []);
+      orders.unshift({ ref, items: { ...cart }, total, time, name: nm.value.trim(), placed: new Date().toISOString() });
+      store.set("orders", orders);
       cart = {}; renderCart();
       $("#cart-body").innerHTML = `<div class="confirm"><p class="big">Order ${ref}</p><p style="margin-inline:auto">Thanks, ${esc(nm.value.trim().split(" ")[0])}. Your order will be ready at <strong>${time}</strong>. Give your order number at the counter and pay by card or SnapScan.</p></div>`;
     });
@@ -212,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#gallery-grid").innerHTML = GALLERY.map((g, i) => `<button type="button" data-i="${i}" aria-label="Open photo: ${esc(g.caption)}"><img src="${g.src}" data-fallback="${g.fallback}" alt="${esc(g.alt)}" loading="lazy"><figcaption>${esc(g.caption)}</figcaption></button>`).join("");
   let lbIndex = 0, lastFocus = null;
   const lb = $("#lightbox");
-  const showLb = i => { lbIndex = (i + GALLERY.length) % GALLERY.length; const g = GALLERY[lbIndex]; $("#lb-img").dataset.fallback = g.fallback; $("#lb-img").src = g.full || g.src; $("#lb-img").alt = g.alt; $("#lb-cap").textContent = g.caption; };
+  const showLb = i => { lbIndex = (i + GALLERY.length) % GALLERY.length; const g = GALLERY[lbIndex]; $("#lb-img").dataset.n = 0; $("#lb-img").dataset.fallback = g.fallback; $("#lb-img").src = g.src; $("#lb-img").alt = g.alt; $("#lb-cap").textContent = g.caption; };
   $("#gallery-grid").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; lastFocus = b; showLb(Number(b.dataset.i)); lb.classList.add("open"); $("#lb-close").focus(); });
   const closeLb = () => { lb.classList.remove("open"); if (lastFocus) lastFocus.focus(); };
   $("#lb-close").addEventListener("click", closeLb);
@@ -315,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <p style="margin-inline:auto">${esc(b.name.split(" ")[0])}, we've received your booking for <strong>${b.guests} ${b.guests === 1 ? "person" : "people"}</strong> on <strong>${nice} at ${b.time}</strong> (${b.seat === "Either" ? "any table" : b.seat.toLowerCase()}).</p>
       ${saved.ok
         ? `<p style="margin-inline:auto">Your reference is <strong>${b.ref}</strong>. We'll confirm by SMS to ${esc(b.phone)} within two hours.</p>`
-        : `<p style="margin-inline:auto"><strong>We couldn't send this to our booking system</strong>, so please call us on <a href="tel:+27110000001">011 000 0001</a> to confirm. Your reference is ${b.ref}.</p>`}
+        : `<p style="margin-inline:auto"><strong>We couldn't send this to our booking system</strong>, so please call us on <a href="tel:+27645394349">064 539 4349</a> to confirm. Your reference is ${b.ref}.</p>`}
       <button class="btn btn-outline" type="button" id="another">Make another booking</button></div>`;
     $("#confirm-box").focus();
     $("#another").addEventListener("click", () => location.reload());

@@ -37,7 +37,7 @@ cafe/
 ├── js/
 │   ├── data.js       Menu, gallery, reviews, opening hours
 │   └── app.js        Theme, nav, menu tabs, cart, lightbox, carousel, reservations
-└── assets/img/       Illustrations (SVG) for menu items, gallery and hero
+└── assets/photos/    Real JPG photos for the menu, gallery and hero
 ```
 
 ## Design
@@ -98,10 +98,9 @@ To update the site later, zip the files again and drag the zip onto the app's de
 
 ## Photos
 
-Menu, hero and gallery photos load from Unsplash (see the `PHOTO` list at the top of `js/data.js`).
-To use your own photos, put them in `assets/photos/` and change that item's value, e.g.
-`"flat-white": "assets/photos/flat-white.jpg"`. If any photo fails to load, the original illustration
-from `assets/img/` is shown instead.
+All pictures are real JPG photos. Each one loads from `assets/photos/<name>.jpg` if the file exists
+(run `download-photos.ps1` once to save them all, or add your own with the same file name), and otherwise
+from the internet (Unsplash, then a Flickr keyword search). The names and links are listed in `js/data.js`.
 
 ## Sign in / create account (Azure database)
 
@@ -128,3 +127,11 @@ Accounts and table bookings are stored in **Azure Table Storage**.
 cd api
 npm test
 ```
+
+## Orders (sign-in required)
+
+Anyone can browse the menu and fill the basket, but **placing an order needs an account**.
+The basket is kept while the visitor signs in. Orders are checked on the server (`POST /api/order`
+refuses requests without a valid session) and saved to the `orders` table in Azure Table Storage:
+date, order number, customer, phone, pickup time, items and total. View them in the storage account >
+*Storage browser > Tables > orders*.

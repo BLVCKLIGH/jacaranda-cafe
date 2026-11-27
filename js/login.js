@@ -12,12 +12,14 @@ function nextUrl() {
 
 document.addEventListener("error", e => {
   const i = e.target;
-  if (i.tagName === "IMG" && i.dataset.fallback && !i.src.endsWith(i.dataset.fallback)) i.src = i.dataset.fallback;
+  if (i.tagName !== "IMG" || !i.dataset.fallback) return;
+  const list = i.dataset.fallback.split("|"), n = Number(i.dataset.n || 0);
+  if (n < list.length) { i.dataset.n = n + 1; i.src = list[n]; }   // try the next source
 }, true);
 
 document.addEventListener("DOMContentLoaded", () => {
   /* Photo */
-  if (typeof photo === "function") $("#auth-img").src = photo("hero", 1000);
+  { const h = $("#auth-img"); h.dataset.fallback = photoFallbacks("hero", 1000, 1200); if (h.complete && !h.naturalWidth) h.dispatchEvent(new Event("error")); }
 
   /* Theme */
   const themeBtn = $("#theme-btn");
@@ -51,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   tabs.in.addEventListener("click", () => show("in"));
   tabs.up.addEventListener("click", () => show("up"));
-  if (location.hash === "#signup") show("up");
 
   /* Show / hide password */
   $$(".pass-toggle").forEach(b => b.addEventListener("click", () => {
@@ -105,4 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   forms.in.addEventListener("submit", e => { e.preventDefault(); submit(forms.in, ["in-email", "in-pass"], "login", () => ({ email: $("#in-email").value, password: $("#in-pass").value }), () => $("#in-remember").checked); });
   forms.up.addEventListener("submit", e => { e.preventDefault(); submit(forms.up, ["up-name", "up-email", "up-pass", "up-pass2"], "register", () => ({ name: $("#up-name").value, email: $("#up-email").value, password: $("#up-pass").value }), () => true); });
+
+  if (location.hash === "#signup") show("up");   // after all handlers exist
 });

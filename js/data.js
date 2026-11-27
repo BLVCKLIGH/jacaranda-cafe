@@ -1,29 +1,47 @@
-/* Photos are loaded from Unsplash (free to use). To use your own photos instead, put them in assets/photos/
-   and replace the PHOTO value for that item with the path, e.g.  "flat-white": "assets/photos/flat-white.jpg"
-   If a photo ever fails to load, the original illustration in assets/img/ is shown instead. */
-const U = (id, w = 600) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=75`;
-const PHOTO = {
-  // Coffee
-  "flat-white": "1534778101976-62847782c213", "cappuccino": "1572442388796-11668a67e53d", "americano": "1495474472287-4d71bcdd2085",
-  "red-cappuccino": "1509042239860-f550ce710b93", "mocha": "1514432324607-a09d9b4aefdd", "iced-latte": "1461023058943-07fcbe16d735",
-  // Fast food
-  "burger": "1568901346375-23c9450c58cd", "toastie": "1528735602780-2552fd46c7af", "wrap": "1626700051175-6818013e1d4f",
-  "chips": "1573080496219-bb080dd4f877", "bowl": "1512621776951-a57141f2eefd",
-  // Desserts
-  "croissant": "1555507036-ab1f4038808a", "cake": "1565958011703-44f9829ba187", "carrot-cake": "1621303837174-89787a7d4729",
-  "brownie": "1606313564200-e75d5e30476c", "malva": "1488477181946-6428a0291777",
-  // Beverages
-  "smoothie": "1553530666-ba11a7da3888", "lemonade": "1621263764928-df1444c5e859", "rooibos": "1544787219-7f47ccb76574",
-  "milkshake": "1572490122747-3968b75cc699", "juice": "1600271886742-f049cd451bba",
-  // Specials
-  "jacaranda-latte": "1541167760496-1628856ab772", "pancakes": "1567620905732-2d1ec7ab7445", "shakshuka": "1590412200988-a436970781fa",
-  "breakfast": "1525351484163-7529414344d8",
-  // Gallery + hero
-  "hero": "1554118811-1e0d58224f24", "g-terrace": "1559329007-40df8a9345d8", "g-counter": "1442512595331-e89e73853f31",
-  "g-flatwhite": "1495474472287-4d71bcdd2085", "g-storefront": "1521017432531-fbd92d768814", "g-bakes": "1509440159596-0249088772ff",
-  "g-brunch": "1504754524776-8f4f37790ca0",
+/* Every picture is a real photo (JPG).
+   1. First it looks for your own file in assets/photos/<name>.jpg  (run download-photos.ps1 to save them all, or add your own).
+   2. If that file isn't there, it loads the photo from the internet instead (Unsplash, then a Flickr keyword search).
+   To use your own photo, save it as assets/photos/<name>.jpg, e.g. assets/photos/flat-white.jpg. */
+const PHOTOS = {
+  "flat-white": ["1534778101976-62847782c213", "latte,coffee", 1],
+  "cappuccino": ["1572442388796-11668a67e53d", "cappuccino", 2],
+  "americano": ["1495474472287-4d71bcdd2085", "black,coffee", 3],
+  "red-cappuccino": ["1509042239860-f550ce710b93", "coffee,cup", 4],
+  "mocha": ["1514432324607-a09d9b4aefdd", "mocha,coffee", 5],
+  "iced-latte": ["1461023058943-07fcbe16d735", "iced,coffee", 6],
+  "burger": ["1568901346375-23c9450c58cd", "burger", 7],
+  "toastie": ["1528735602780-2552fd46c7af", "sandwich,toasted", 8],
+  "wrap": ["1626700051175-6818013e1d4f", "falafel,wrap", 9],
+  "chips": ["1573080496219-bb080dd4f877", "french,fries", 10],
+  "bowl": ["1512621776951-a57141f2eefd", "salad,bowl", 11],
+  "croissant": ["1555507036-ab1f4038808a", "croissant", 12],
+  "cake": ["1565958011703-44f9829ba187", "strawberry,cake", 13],
+  "carrot-cake": ["1621303837174-89787a7d4729", "carrot,cake", 14],
+  "brownie": ["1606313564200-e75d5e30476c", "chocolate,brownie", 15],
+  "malva": ["1488477181946-6428a0291777", "pudding,dessert", 16],
+  "smoothie": ["1553530666-ba11a7da3888", "smoothie", 17],
+  "lemonade": ["1621263764928-df1444c5e859", "lemonade", 18],
+  "rooibos": ["1544787219-7f47ccb76574", "tea,teapot", 19],
+  "milkshake": ["1572490122747-3968b75cc699", "milkshake", 20],
+  "juice": ["1600271886742-f049cd451bba", "orange,juice", 21],
+  "jacaranda-latte": ["1541167760496-1628856ab772", "latte,art", 22],
+  "pancakes": ["1567620905732-2d1ec7ab7445", "pancakes", 23],
+  "shakshuka": ["1590412200988-a436970781fa", "shakshuka", 24],
+  "breakfast": ["1525351484163-7529414344d8", "english,breakfast", 25],
+  "hero": ["1554118811-1e0d58224f24", "cafe,interior", 26],
+  "g-terrace": ["1559329007-40df8a9345d8", "cafe,terrace", 27],
+  "g-counter": ["1442512595331-e89e73853f31", "coffee,bar", 28],
+  "g-flatwhite": ["1495474472287-4d71bcdd2085", "flat,white,coffee", 29],
+  "g-storefront": ["1521017432531-fbd92d768814", "cafe,storefront", 30],
+  "g-bakes": ["1509440159596-0249088772ff", "bakery,pastries", 31],
+  "g-brunch": ["1504754524776-8f4f37790ca0", "brunch,table", 32]
+};  // name: [Unsplash id, search keywords, seed]
+const photo = key => `assets/photos/${key}.jpg`;
+const photoFallbacks = (key, w = 600, h = 600) => {
+  const [id, kw, seed] = PHOTOS[key] || ["", "cafe", 1];
+  return [id && `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&fm=jpg&q=80&w=${w}&h=${h}`,
+          `https://loremflickr.com/${w}/${h}/${kw.replace(/,/g, "%2C")}?lock=${seed}`].filter(Boolean).join("|");
 };
-const photo = (key, w) => { const p = PHOTO[key]; return /^(assets|https?:)/.test(p) ? p : U(p, w); };
 const MENU = [
   // Coffee
   { id: "c1", cat: "Coffee", name: "Flat white", desc: "Double ristretto with silky steamed milk. Our house blend is roasted in Maboneng.", price: 38, img: "flat-white", tags: ["Bestseller"] },
@@ -55,17 +73,17 @@ const MENU = [
   { id: "s2", cat: "Specials", name: "Buttermilk pancakes", desc: "A stack of three with berries, crème fraîche and maple syrup.", price: 95, img: "pancakes" },
   { id: "s3", cat: "Specials", name: "Shakshuka", desc: "Eggs baked in spiced tomato and peppers, with toasted ciabatta.", price: 105, img: "shakshuka", tags: ["Vegetarian"] },
   { id: "s4", cat: "Specials", name: "Big Parkhurst breakfast", desc: "Two eggs, bacon, boerewors, mushrooms, tomato and toast.", price: 135, img: "breakfast" },
-].map(m => ({ ...m, fallback: `assets/img/${m.img}.svg`, img: photo(m.img, 400) }));
+].map(m => ({ ...m, fallback: photoFallbacks(m.img, 600, 600), img: photo(m.img) }));
 
 const MENU_CATS = ["Coffee", "Fast food", "Desserts", "Beverages", "Specials"];
 
 const GALLERY = [
-  { src: photo("g-terrace", 800), full: photo("g-terrace", 1400), fallback: "assets/img/gallery-terrace.svg", alt: "Outdoor tables under two jacaranda trees", caption: "The terrace in November" },
-  { src: photo("g-counter", 800), full: photo("g-counter", 1400), fallback: "assets/img/gallery-counter.svg", alt: "Espresso machine on the green-tiled coffee bar", caption: "Our coffee bar" },
-  { src: photo("g-flatwhite", 800), full: photo("g-flatwhite", 1400), fallback: "assets/img/gallery-flatwhite.svg", alt: "Flat white with latte art", caption: "Flat white, the most-ordered drink" },
-  { src: photo("g-storefront", 800), full: photo("g-storefront", 1400), fallback: "assets/img/gallery-storefront.svg", alt: "The café shopfront with a striped purple awning", caption: "Find us on 4th Avenue" },
-  { src: photo("g-bakes", 800), full: photo("g-bakes", 1400), fallback: "assets/img/gallery-bakes.svg", alt: "Croissants and brownies on plates", caption: "Baked here every morning" },
-  { src: photo("g-brunch", 800), full: photo("g-brunch", 1400), fallback: "assets/img/gallery-brunch.svg", alt: "Pancakes with berries and a pot of rooibos", caption: "Saturday brunch" },
+  { src: photo("g-terrace"), fallback: photoFallbacks("g-terrace", 1400, 1000), alt: "Outdoor tables under two jacaranda trees", caption: "The terrace in November" },
+  { src: photo("g-counter"), fallback: photoFallbacks("g-counter", 1400, 1000), alt: "Espresso machine on the green-tiled coffee bar", caption: "Our coffee bar" },
+  { src: photo("g-flatwhite"), fallback: photoFallbacks("g-flatwhite", 1400, 1000), alt: "Flat white with latte art", caption: "Flat white, the most-ordered drink" },
+  { src: photo("g-storefront"), fallback: photoFallbacks("g-storefront", 1400, 1000), alt: "The café shopfront with a striped purple awning", caption: "Find us on 4th Avenue" },
+  { src: photo("g-bakes"), fallback: photoFallbacks("g-bakes", 1400, 1000), alt: "Croissants and brownies on plates", caption: "Baked here every morning" },
+  { src: photo("g-brunch"), fallback: photoFallbacks("g-brunch", 1400, 1000), alt: "Pancakes with berries and a pot of rooibos", caption: "Saturday brunch" },
 ];
 
 const REVIEWS = [

@@ -51,3 +51,15 @@ test("without a database it explains what to set up", async () => {
   assert.equal(r.status, 503); assert.equal(r.body.setup, true);
   process.env.LOCAL_MEMORY = "1";
 });
+
+test("orders need a signed-in account", async () => {
+  const order = { items: { burger: 2, "flat-white": 1 }, name: "Thandi", phone: "0821234567", time: "10:30", total: 180 };
+  const anon = await run("order", { body: order });
+  assert.equal(anon.status, 401); assert.equal(anon.body.signin, true);
+  assert.equal((await run("order", { body: order, token: "forged.token" })).status, 401);
+  const l = await run("login", { body: { email: good.email, password: good.password } });
+  const ok = await run("order", { body: order, token: l.body.token });
+  assert.equal(ok.status, 201); assert.match(ok.body.ref, /^J-[0-9A-F]{4}$/);
+  assert.equal((await run("order", { body: { ...order, items: {} }, token: l.body.token })).status, 400);
+  assert.equal((await run("order", { body: { ...order, items: { x: -5 } }, token: l.body.token })).status, 400);
+});

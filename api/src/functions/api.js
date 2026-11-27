@@ -14,4 +14,5 @@ const route = (name, method = "POST") => app.http(name, {
 route("register");
 route("login");
 route("reservation");
+route("order");
 route("me", "GET");

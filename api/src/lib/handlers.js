@@ -77,6 +77,29 @@ const handlers = {
     await store.createEntity("reservations", { partitionKey: b.date, rowKey: ref, ...b, userEmail: claims ? claims.sub : "", createdAt: new Date().toISOString() });
     return { status: 201, body: { ref } };
   },
+
+  async order({ body, token }) {
+    const claims = sec.verifyToken(token);
+    if (!claims) return fail(401, "Please sign in to place an order.", { signin: true });
+    const items = {};
+    for (const [id, qty] of Object.entries(body.items || {})) {
+      if (/^[a-z0-9-]{1,40}$/.test(id) && Number.isInteger(qty) && qty >= 1 && qty <= 20) items[id] = qty;
+    }
+    if (!Object.keys(items).length || Object.keys(items).length > 30) return fail(400, "Your order is empty.");
+    const name = clean(body.name, 80), phone = clean(body.phone, 20), time = clean(body.time, 5);
+    if (name.length < 2) return fail(400, "Enter your name.");
+    if (!PHONE.test(phone.replace(/[\s()-]/g, ""))) return fail(400, "Enter a valid South African mobile number.");
+    if (!/^\d{2}:\d{2}$/.test(time)) return fail(400, "Choose a pickup time.");
+    const total = Number(body.total);
+    const day = new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Johannesburg" });
+    const ref = "J-" + crypto.randomBytes(2).toString("hex").toUpperCase();
+    await store.createEntity("orders", {
+      partitionKey: day, rowKey: ref, userEmail: claims.sub, name, phone, pickupTime: time,
+      items: JSON.stringify(items), total: Number.isFinite(total) && total > 0 && total < 100000 ? total : 0,
+      status: "new", createdAt: new Date().toISOString(),
+    });
+    return { status: 201, body: { ref } };
+  },
 };
 
 async function run(name, input) {
