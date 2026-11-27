@@ -108,7 +108,7 @@ async function run(name, input) {
   catch (e) {
     if (e.code === "NOT_CONFIGURED") return fail(503, "The database isn't connected yet. Add STORAGE_CONNECTION and AUTH_SECRET in the Static Web App's environment variables.", { setup: true });
     console.error(name, e);
-    return fail(500, "Something went wrong on our side. Please try again.", { code: String(e.code || e.statusCode || e.name || "unknown").slice(0, 40) });
+    return fail(500, "Something went wrong on our side. Please try again.", { code: (String(e.code || e.statusCode || e.name || "unknown") + ": " + String(e.message || "").replace(/AccountKey=[^;\s]*/gi, "AccountKey=***").replace(/\s+/g, " ")).slice(0, 140) });
   }
 }
 module.exports = { run };
